@@ -1,4 +1,9 @@
-\Include\
-\Lib\
-\Scripts\
-\Lib\site-packages\
+Include/
+Lib/
+Scripts/
+share/
+pyvenv.cfg
+
+__pycache__/
+*.pyc
+
