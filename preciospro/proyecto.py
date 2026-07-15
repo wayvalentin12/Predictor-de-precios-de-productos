@@ -52,17 +52,36 @@ if r1_lineal > r2_cuadratica and r1_lineal > r3_exponencial:
     precios_futuros = np.polyval(parametros_lineal, meses_futuros_array)
     for i in range(meses_futuros):
         print(f"El precio del producto en el mes {meses_futuros_array[i]} es: {precios_futuros[i]:.2f}")
+    
+    plt.scatter(meses_array, precios_array, label="Datos historicos")
+    x_curva = np.linspace(1, meses + meses_futuros, 100)
+    y_curva = np.polyval(parametros_lineal, x_curva)
+    plt.plot(x_curva, y_curva, label="Funcion lineal")
+
 elif r2_cuadratica > r1_lineal and r2_cuadratica > r3_exponencial:
       print(f"Esta es la funcion cuadratica{r2_cuadratica:.2f}")
       precios_futuros = np.polyval(parametros_cuadratica, meses_futuros_array)
       for i in range(meses_futuros):
           print(f"El precio del producto en el mes {meses_futuros_array[i]} es: {precios_futuros[i]:.2f}")
+      plt.scatter(meses_array, precios_array, label="Datos historicos")
+      x_curva = np.linspace(1, meses + meses_futuros, 100)
+      y_curva = np.polyval(parametros_cuadratica, x_curva)
+      plt.plot(x_curva, y_curva, label="Funcion cuadratica")
 else:
      print(f"Esta es la funcion exponencial{r3_exponencial:.2f}")
      precios_futuros = exponencial(meses_futuros_array, parametros_exponencial[0], parametros_exponencial[1])
      for i in range(meses_futuros):
          print(f"El precio del producto en el mes {meses_futuros_array[i]} es: {precios_futuros[i]:.2f}")
+     plt.scatter(meses_array, precios_array, label="Datos historicos")
+     x_curva = np.linspace(1, meses + meses_futuros, 100)
+     y_curva = exponencial(x_curva, parametros_exponencial[0], parametros_exponencial[1])
+     plt.plot(x_curva, y_curva, label="Funcion exponencial")
 
+plt.title("Prediccion de precios de productos")
+plt.xlabel("Meses")
+plt.ylabel("Precios")
+plt.legend()
+plt.show()
 
 
 
