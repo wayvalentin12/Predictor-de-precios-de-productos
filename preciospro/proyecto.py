@@ -20,16 +20,17 @@ def calcular():
 
    meses_lista = []
 
-   meses = len(precios_lista)
-   for m in range(meses + 1):
+   meses = len(precios_array)
+   for m in range(meses):
       meses_lista.append(m)
    meses_array = np.array(meses_lista)  
 
    lista_meses_futuros = []
 
    meses_futuros = int(entry_meses_futuros.get())
-   for i in range(meses_futuros + 1):
-      lista_meses_futuros.append(i)
+   meses_futuros_lista = [int(m) for m in range(meses, meses + meses_futuros)]
+   for i in range(len(meses_futuros_lista)):
+      lista_meses_futuros.append(meses_futuros_lista[i])
 
    meses_futuros_array = np.array(lista_meses_futuros)
 #Este modulo sirve para generar las 3 funciones usando los datos que nos dio el usuario(meses y precios)
@@ -53,6 +54,9 @@ def calcular():
    r2_cuadratica = r2_score(precios_array, funcion_cuadratica)
    r3_exponencial = r2_score(precios_array, funcion_exponencial)
 
+   for widget in ventana.winfo_children():
+        if isinstance(widget, tk.Label) and widget != label_precios and widget != label_meses_futuros:
+            widget.destroy()
    
 #En este modulo lo que hacemos es saber cual fue el coeficiente de determinacion mayor, es decir, saber
 #cual funcion encaja mas para predecir los precios futuros
@@ -64,32 +68,35 @@ def calcular():
      #en la funcion que mas encaja
      precios_futuros = np.polyval(parametros_lineal, meses_futuros_array)
      #Este modulo sirve para mostrar el precio del producto por cada mes futuro dado
-     for i in range(lista_meses_futuros + meses_lista):
-        precios_meses = tk.Label(ventana, text=f"El precio del producto en el mes {meses_futuros_array[i]} es: {precios_futuros[i]:.2f}")
+     for i in range(len(meses_futuros_array)):
+        texto = f"El precio del producto en el mes {meses_futuros_array[i]} es: {precios_futuros[i]:.2f} (PREDICCIÓN)"
+        precios_meses = tk.Label(ventana, text=texto)
         precios_meses.pack()
      plt.scatter(meses_array, precios_array, label="Datos historicos")
-     x_curva = np.linspace(1, meses + meses_futuros, 100)
+     x_curva = np.linspace(0, meses + meses_futuros - 1, 100)
      y_curva = np.polyval(parametros_lineal, x_curva)
      plt.plot(x_curva, y_curva, label="Funcion lineal")
 
    elif r2_cuadratica > r1_lineal and r2_cuadratica > r3_exponencial:
       print(f"Esta es la funcion cuadratica: {r2_cuadratica:.2f}")
       precios_futuros = np.polyval(parametros_cuadratica, meses_futuros_array)
-      for i in range(meses_futuros):
-         precios_meses = tk.Label(ventana, text=f"El precio del producto en el mes {meses_futuros_array[i]} es: {precios_futuros[i]:.2f}")
-         precios_meses.pack()
+      for i in range(len(meses_futuros_array)):
+        texto = f"El precio del producto en el mes {meses_futuros_array[i]} es: {precios_futuros[i]:.2f} (PREDICCIÓN)"
+        precios_meses = tk.Label(ventana, text=texto)
+        precios_meses.pack()
       plt.scatter(meses_array, precios_array, label="Datos historicos")
-      x_curva = np.linspace(1, meses + meses_futuros, 100)
+      x_curva = np.linspace(0, meses + meses_futuros - 1, 100)
       y_curva = np.polyval(parametros_cuadratica, x_curva)
       plt.plot(x_curva, y_curva, label="Funcion cuadratica")
    else:
      print(f"Esta es la funcion exponencial:{r3_exponencial:.2f}")
      precios_futuros = exponencial(meses_futuros_array, parametros_exponencial[0], parametros_exponencial[1])
-     for i in range(meses_futuros):
-         precios_meses = tk.Label(ventana, text=f"El precio del producto en el mes {meses_futuros_array[i]} es: {precios_futuros[i]:.2f}")
-         precios_meses.pack()
+     for i in range(len(meses_futuros_array)):
+        texto = f"El precio del producto en el mes {meses_futuros_array[i]} es: {precios_futuros[i]:.2f} (PREDICCIÓN)"
+        precios_meses = tk.Label(ventana, text=texto)
+        precios_meses.pack()
      plt.scatter(meses_array, precios_array, label="Datos historicos")
-     x_curva = np.linspace(1, meses + meses_futuros, 100)
+     x_curva = np.linspace(0, meses + meses_futuros - 1, 100)
      y_curva = exponencial(x_curva, parametros_exponencial[0], parametros_exponencial[1])
      plt.plot(x_curva, y_curva, label="Funcion exponencial")
 
