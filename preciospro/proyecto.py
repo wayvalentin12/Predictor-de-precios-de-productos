@@ -1,87 +1,125 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from sklearn.metrics import r2_score
-#Este es el modulo en donde se guardan los datos historicos del usuario
-meses = int(input("Ingrese la cantidad de meses que tiene de datos historicos: "))
-meses_lista = []
-precios_lista = []
-for i in range(meses):
-    precio_por_mes = float(input(f"ingrese el precio del producto por cada mes {i + 1}: "))
-    precios_lista.append(precio_por_mes)
-    meses_lista.append(i + 1)
+import tkinter as tk
 
-precios_array = np.array(precios_lista)
-meses_array = np.array(meses_lista)
-print("El array de precios es: ", precios_array)
-print("El array de meses es: ", meses_array)
-
-#Modulo para hacer las funciones
-
-parametros_lineal = np.polyfit(meses_array, precios_array, 1)
-print(parametros_lineal)
-parametros_cuadratica = np.polyfit(meses_array, precios_array, 2)
-print(parametros_cuadratica)
+#formula de la funcion exponencial
 
 def exponencial(x, a, b):
     return a * np.exp(b * x)
-parametros_exponencial, _ = curve_fit(exponencial, meses_array, precios_array)
-print(parametros_exponencial)
 
-#Modulo para hacer las pruebas en x de las funciones
+#Modulo para el proceso completo de obtener los precios futuros del producto
+def calcular():
+#Este modulo sirve para recolectar los datos que el usuario inserta en el programa
+   precios = entry_precios.get()
 
-funcion_lineal = np.polyval(parametros_lineal, meses_array)
-funcion_cuadratica = np.polyval(parametros_cuadratica, meses_array)
-funcion_exponencial = exponencial(meses_array, parametros_exponencial[0], parametros_exponencial[1])
+   precios_lista = [float(p) for p in precios.split(",")]
+
+   precios_array = np.array(precios_lista)
+
+   meses_lista = []
+
+   meses = len(precios_lista)
+   for m in range(meses + 1):
+      meses_lista.append(m)
+   meses_array = np.array(meses_lista)  
+
+   lista_meses_futuros = []
+
+   meses_futuros = int(entry_meses_futuros.get())
+   for i in range(meses_futuros + 1):
+      lista_meses_futuros.append(i)
+
+   meses_futuros_array = np.array(lista_meses_futuros)
+#Este modulo sirve para generar las 3 funciones usando los datos que nos dio el usuario(meses y precios)
+   parametros_lineal = np.polyfit(meses_array, precios_array, 1)
+
+   parametros_cuadratica = np.polyfit(meses_array, precios_array, 2)
+
+   parametros_exponencial, _ = curve_fit(exponencial, meses_array, precios_array)
+
+
+#Modulo para hacer las pruebas en x por cada uno de los meses 
+#dados en las 3 funciones ya generadas(usando los parametros y )
+
+   funcion_lineal = np.polyval(parametros_lineal, meses_array)
+   funcion_cuadratica = np.polyval(parametros_cuadratica, meses_array)
+   funcion_exponencial = exponencial(meses_array, parametros_exponencial[0], parametros_exponencial[1])
 
 #Modulo para calcular el r2 de cada funcion
 
-r1_lineal = r2_score(precios_array, funcion_lineal)
-r2_cuadratica = r2_score(precios_array, funcion_cuadratica)
-r3_exponencial = r2_score(precios_array, funcion_exponencial)
+   r1_lineal = r2_score(precios_array, funcion_lineal)
+   r2_cuadratica = r2_score(precios_array, funcion_cuadratica)
+   r3_exponencial = r2_score(precios_array, funcion_exponencial)
 
-meses_futuros = int(input("Ingrese la cantidad de meses que desea predecir: "))
-meses_futuros_lista = []
-for i in range(meses_futuros):
-    meses_futuros_lista.append(meses + i + 1)
-meses_futuros_array = np.array(meses_futuros_lista)
+   
+#En este modulo lo que hacemos es saber cual fue el coeficiente de determinacion mayor, es decir, saber
+#cual funcion encaja mas para predecir los precios futuros
 
-if r1_lineal > r2_cuadratica and r1_lineal > r3_exponencial:
-    print(f"Esta es la funcion lineal{r1_lineal:.2f}")
-    precios_futuros = np.polyval(parametros_lineal, meses_futuros_array)
-    for i in range(meses_futuros):
-        print(f"El precio del producto en el mes {meses_futuros_array[i]} es: {precios_futuros[i]:.2f}")
-    
-    plt.scatter(meses_array, precios_array, label="Datos historicos")
-    x_curva = np.linspace(1, meses + meses_futuros, 100)
-    y_curva = np.polyval(parametros_lineal, x_curva)
-    plt.plot(x_curva, y_curva, label="Funcion lineal")
+   if r1_lineal > r2_cuadratica and r1_lineal > r3_exponencial:
 
-elif r2_cuadratica > r1_lineal and r2_cuadratica > r3_exponencial:
-      print(f"Esta es la funcion cuadratica{r2_cuadratica:.2f}")
+     print(f"Esta es la funcion lineal: {r1_lineal:.2f}")
+     #Este modulo sirve para sustituir los valores en x por los meses futuros que el usuario quiere predecir
+     #en la funcion que mas encaja
+     precios_futuros = np.polyval(parametros_lineal, meses_futuros_array)
+     #Este modulo sirve para mostrar el precio del producto por cada mes futuro dado
+     for i in range(lista_meses_futuros + meses_lista):
+        precios_meses = tk.Label(ventana, text=f"El precio del producto en el mes {meses_futuros_array[i]} es: {precios_futuros[i]:.2f}")
+        precios_meses.pack()
+     plt.scatter(meses_array, precios_array, label="Datos historicos")
+     x_curva = np.linspace(1, meses + meses_futuros, 100)
+     y_curva = np.polyval(parametros_lineal, x_curva)
+     plt.plot(x_curva, y_curva, label="Funcion lineal")
+
+   elif r2_cuadratica > r1_lineal and r2_cuadratica > r3_exponencial:
+      print(f"Esta es la funcion cuadratica: {r2_cuadratica:.2f}")
       precios_futuros = np.polyval(parametros_cuadratica, meses_futuros_array)
       for i in range(meses_futuros):
-          print(f"El precio del producto en el mes {meses_futuros_array[i]} es: {precios_futuros[i]:.2f}")
+         precios_meses = tk.Label(ventana, text=f"El precio del producto en el mes {meses_futuros_array[i]} es: {precios_futuros[i]:.2f}")
+         precios_meses.pack()
       plt.scatter(meses_array, precios_array, label="Datos historicos")
       x_curva = np.linspace(1, meses + meses_futuros, 100)
       y_curva = np.polyval(parametros_cuadratica, x_curva)
       plt.plot(x_curva, y_curva, label="Funcion cuadratica")
-else:
-     print(f"Esta es la funcion exponencial{r3_exponencial:.2f}")
+   else:
+     print(f"Esta es la funcion exponencial:{r3_exponencial:.2f}")
      precios_futuros = exponencial(meses_futuros_array, parametros_exponencial[0], parametros_exponencial[1])
      for i in range(meses_futuros):
-         print(f"El precio del producto en el mes {meses_futuros_array[i]} es: {precios_futuros[i]:.2f}")
+         precios_meses = tk.Label(ventana, text=f"El precio del producto en el mes {meses_futuros_array[i]} es: {precios_futuros[i]:.2f}")
+         precios_meses.pack()
      plt.scatter(meses_array, precios_array, label="Datos historicos")
      x_curva = np.linspace(1, meses + meses_futuros, 100)
      y_curva = exponencial(x_curva, parametros_exponencial[0], parametros_exponencial[1])
      plt.plot(x_curva, y_curva, label="Funcion exponencial")
 
-plt.title("Prediccion de precios de productos")
-plt.xlabel("Meses")
-plt.ylabel("Precios")
-plt.legend()
-plt.show()
+   plt.title("Prediccion de precios de productos")
+   plt.xlabel("Meses")
+   plt.ylabel("Precios")
+   plt.legend()
+   plt.show()
+
+
+ventana = tk.Tk()
+ventana.title("Prediccion de precios futuros")
+ventana.geometry("1000x600")
+
+label_precios = tk.Label(ventana, text="INGRESE AQUI LOS PRECIOS ANTERIORES DEL PRODUCTO, SEPARADOS POR COMA!: ")
+label_precios.pack()
+
+entry_precios = tk.Entry(ventana, font=("Arial", 11), width=30)
+entry_precios.pack()
+
+label_meses_futuros = tk.Label(ventana, text="INGRESE LA CANTIDAD DE MESES QUE DESEA PREDECIR: ")
+label_meses_futuros.pack()
+
+entry_meses_futuros = tk.Entry(ventana, font=("Arial", 11), width=30)
+entry_meses_futuros.pack()
+
+calcular_boton = tk.Button(ventana, text="CALCULAR", command=calcular)
+calcular_boton.pack()
+
+ventana.mainloop()
 
 
 
